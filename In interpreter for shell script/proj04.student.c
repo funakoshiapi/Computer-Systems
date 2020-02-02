@@ -1,6 +1,5 @@
 // Name: Funakoshi SIlva
 // Course: CSE 325
-// APID: A51837997
 
 
 #include <stdio.h>
