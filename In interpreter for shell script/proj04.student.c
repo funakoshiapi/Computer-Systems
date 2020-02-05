@@ -1,11 +1,11 @@
 // Name: Funakoshi SIlva
 // Course: CSE 325
+// APID: A51837997
 
 
 #include <stdio.h>
 #include <string.h>
 #include <iterator>
-#include <algorithm>
 #include <sstream>
 #include <string>
 #include <sys/types.h>
@@ -19,11 +19,13 @@
 using namespace std;
 
 const int MAX_LINE_LENGTH = 128;
+ int count; // will represent the count of number of lines
+ bool flag;
 
 // Function declaration
 vector<string> fileReader(string);
 void interpreter(vector<string>,bool, bool);
-void indicator(int);
+void indicator();
 void aceptableCommands(string, bool);
 
 int main(int argc, char *argv[], char * envp[])
@@ -36,21 +38,23 @@ int main(int argc, char *argv[], char * envp[])
     vector<string> commands = {"exit","date", "env", "path","cwd"};
     vector<string> tokens;
     int countFiles=1;
+    
   
 
-     cout<< "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ CSE 325 MICHIGAN STATE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<< endl;
+
      cout<< endl;
      
     while (!exit)
     {
 
     
-        // Read Command line arguments and store  the no a vector
+        // Read Command line arguments and store  them on a vector
         for(int i=1; i<argc; i++)
         {
             arguments.push_back(argv[i]);
         }
 
+        // Decides if silence mode is off or on
         for (auto condition : arguments)
         {    
         
@@ -66,14 +70,18 @@ int main(int argc, char *argv[], char * envp[])
       
             }
 
+            // opens the file and interprets its content
+
             if (condition != "-v" && condition != "-s")
-            {
+            {    count= 1; // first line of file
+                 flag = false; // don't output anything when exit argument is used
                  tokens = fileReader(condition);
                  interpreter(tokens, behaviour, exit);
+                 
             }
            
 
-       
+            // terminates the program once all the files are read
              if (countFiles == arguments.size())
              {
                 exit = true;
@@ -91,14 +99,17 @@ int main(int argc, char *argv[], char * envp[])
 
 
 cout<< endl;
-cout<< "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ CSE 325 MICHIGAN STATE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<< endl;
+
 
 return 0;
 }
 
 
 
-
+/** Reads open, reads as file and closes the file.
+ *  @param fileName the name of the file to be read
+ *  @return tokens return a vecot of tokens
+ */
 vector<string> fileReader(string fileName)
 {
     string line;
@@ -107,28 +118,40 @@ vector<string> fileReader(string fileName)
     vector<string> tokens;
     string hold;
 
+    cout << endl;
+    cout << endl;
+    cout << "__________ " <<"Displaying " << fileName  << " __________"  << endl;
+    cout << endl;
+    cout << endl;
+    cout << endl;
+    cout << endl;
+
     if (document.is_open())
     {
 
     
         while( getline(document, line) )
         {       
-
+            //cout << line << endl;
             if ( line.length() > MAX_LINE_LENGTH )
             {
                 cout << endl;
-                cout<< "Maximun length of file was exceeded. Maximum number of lines is 128."<<endl;
+                indicator();
+                cout<<" :( ---->  "<< "Maximun length for line " <<count<<" was exceeded. Maximum lenght for line is  128 characters."<<endl;
                 cout << endl;
-                break;
+                
             }
 
             // do stok and append the first string in index zero
-            istringstream tokenized(line);
-
-            while(tokenized>>hold)
-            {
-                tokens.push_back(hold);
-                break;
+            istringstream content(line);
+        
+            while(content)
+            {   
+                string tokenized;
+                getline( content, tokenized, ' ' );
+                tokens.push_back(tokenized);
+                //cout << tokenized<< endl;
+                 break;
             }
 
         }
@@ -138,7 +161,7 @@ vector<string> fileReader(string fileName)
     else
     {
                 cout << endl;
-                cout<<"     ---->" << fileName << " does not exits in the current directory."<<endl;
+                cout<<"    :( ---->" << fileName << " does not exits in the current directory."<<endl;
                 cout << endl;
 
     }
@@ -149,26 +172,36 @@ vector<string> fileReader(string fileName)
     
 }
 
-
+/** Decides when to execute the display of number lines 
+ * and call helper functions to interpret a arguments
+ *  @param tokens first string found in the txt file 
+ *  @param behaviour boolean value that control if silence mode is on or not
+ *  @param exit boolean value that decides the termination of the program 
+ *  @return None
+ */
 void interpreter(vector<string> tokens, bool behaviour,bool exit)
 {   
-    int count = 1;
-
+  
     for (auto argument : tokens)
     {  
-        if (behaviour)
-        {   
-            indicator(count);
+        if (flag==false)
+        {
 
-            aceptableCommands(argument, exit);
-        }
-
-        else
-         {
-            aceptableCommands(argument, exit); 
-         }
         
-         count++;
+            if (behaviour)
+            {   
+                indicator();
+
+                aceptableCommands(argument, exit);
+            }
+
+            else
+            {
+                aceptableCommands(argument, exit); 
+            }
+        
+        }
+        
     }
 
 
@@ -176,65 +209,94 @@ void interpreter(vector<string> tokens, bool behaviour,bool exit)
    
 }
 
-
-void indicator(int count)
+/** prints the number of line of the txt file
+ *  
+ *  
+ *  @return None
+ */
+void indicator( )
 {
+
     cout << "<"<< count <<">";
+    count = count + 1;
+
+
 }
 
 
-
+/** Decision making for aceptable commands.
+ *  @param argument reference to the commands in the text file
+ *  @param exit boolean value that decides the termination of the program
+ *  @return None
+ */
 void aceptableCommands(string argument, bool exit)
 {
     if ( argument == "exit")
-           {
-               exit = true;
-        
-           }
+    {
+        cout<< " exit : " << " Interpreter terminated " << endl;
+        flag = true;
 
+    }
+
+
+    if (flag==false)  
+    {
+
+         
+           
            if ( argument == "date")
            {  
                 
                 time_t systemTime = time(0);
                 char* time = ctime(&systemTime);
 
-                cout << " " << time;
+                cout<< " date : " << " " << time;
                
            }
 
-            if ( argument == "env")
+            else if ( argument == "env")
             {
                
                for (char **env = environ; *env; env++){
 
 					char* systemEnv = *env;
 
-					cout<< " " << systemEnv;
+					cout<< " env : "<< " " << systemEnv;
                     cout<< endl;   
 				}
     
         
             }
 
-            if ( argument == "path")
+           else if ( argument == "path")
             {
                
                 const char* env_p = std::getenv("PATH");
                     
-                cout << " PATH is: " << env_p;
+                cout << " path : " << env_p;
                 cout<< endl;   
         
             }
 
-            if ( argument == "cwd")
+           else if ( argument == "cwd")
             {
                
                	char buffer[MAX_LINE_LENGTH];
 				getcwd(buffer, MAX_LINE_LENGTH);
-				cout <<" "<< buffer;
+				cout<< " cdw : " <<" "<< buffer;
                 cout<< endl;   
         
             }
+
+            else
+            {
+                cout<<endl;
+            }
+            
+
+            
+
+    }
 
            
        cout<< endl;      
