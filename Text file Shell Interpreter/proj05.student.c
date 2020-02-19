@@ -16,10 +16,11 @@
 #include <fstream>
 #include <cstdlib>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 using namespace std;
-
+const char* userName = cuserid(NULL);
 const int MAX_LINE_LENGTH = 128;
  int count; // will represent the count of number of lines
  bool flag;
@@ -37,15 +38,14 @@ int main(int argc, char *argv[], char * envp[])
     bool behaviour = true;
     bool exit = false;
     bool terminate = false;
-    //vector<string> commands = {"exit","date", "env", "path","cwd"};
     vector<string> tokens;
     int countFiles=1;
     
   
 
 
-     cout<< endl;
-     
+    cout<< endl;
+
     while (!exit)
     {
 
@@ -268,24 +268,74 @@ void aceptableCommands(string argument, bool exit)
             {
                 string separate;
                 ss >> separate;
-                if (separate != "")
-                {
-                    save.push_back(separate);
-                }
+              
+                save.push_back(separate);
+                
              
             }
 
+            
+            
             if ( save[0] == "cd" )
-            {
-                    if (save.size() == 1 || save[1]== "~") 
+            {       
+
+                    int pathCheck ; /// to test if path exist
+  
+                    char s[100]; 
+
+                    if (save.size() == 2 || save[1]== "~") 
                     {
-                        char s[100];
+                        
                         cout<< " " << argument <<" : ";
                         /// cout<< " directory changed from "<< getcwd(s,100) ;
                         chdir(getenv("HOME"));
                         cout<< getcwd(s,100)<<endl;
                         
                     }
+
+                    /// starter path to be used
+                    string tilda = save[1].substr(0,1); ///> tilda character
+                    string userInput = save[1].substr(1);    ///> possible username
+                    string dir = save[1].substr(0);
+                    string pathUser = "/home/";
+                    string pathDir = "/home/" + dir;
+                    int dirCheck = chdir(pathDir.c_str());
+                    //cout << dir << endl;
+                    //  cout << tilda << endl;
+                    
+                    if (tilda == "~")   /// user name check
+                    {
+                        if (userName == userInput)
+                    
+                        {    
+                            pathUser += userInput;   
+                            chdir(pathUser.c_str());
+                            cout<< " " << argument << " : ";
+                            cout << getcwd(s,100) << endl;    
+                        }
+
+                        else 
+                        {
+                            cout<<" " << argument<<" : " << " Username is invalid. Failed to move to home directory" << endl;
+                        }
+                    }
+
+                    else if (  dirCheck == 0 ) /// directory name check
+                    {
+                         cout<< " " << argument << " : ";
+                         cout << getcwd(s,100) << endl;
+                    }
+
+                    else
+                    {
+                        cout<<" " << argument << " : " << " Directory does not exist" << endl;
+                    }
+
+                
+
+                    
+
+
                 
             }
          
@@ -333,15 +383,6 @@ void aceptableCommands(string argument, bool exit)
                 cout<< endl;   
         
             }
-
-            // else if (argument == "cd" || argument == "cd ~" )
-            // {   
-            //     char s[100];
-            //     cout<< " " << argument <<" : ";
-            //    /// cout<< " directory changed from "<< getcwd(s,100) ;
-            //     chdir(getenv("HOME"));
-            //     cout<< getcwd(s,100)<<endl;
-            // }
 
 
             else
