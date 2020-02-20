@@ -147,7 +147,7 @@ vector<string> fileReader(string fileName)
             // do stok and append the first string in index zero
             istringstream content(line);
         
-            while(content)
+        while(content)
             {   
                 string tokenized;
                 
@@ -156,20 +156,21 @@ vector<string> fileReader(string fileName)
                 if (tokenized == "cd")
                 {
                     tokens.push_back(tokenized);
-                    break;
-                   
+                
                 }
                 else
                 {
                     getline( content, tokenized, ' ' );
+
                     tokens.push_back(tokenized);
-                    break;
+    
                 }
 
                 
                
                  
             }
+
 
         }
 
@@ -275,17 +276,16 @@ void aceptableCommands(string argument, bool exit)
             /// prepear argument to be handled by cd
             istringstream ss(argument); 
             vector<string> save;
+            string separate;
             while (ss)
             {
-                string separate;
+                
                 ss >> separate;
-              
-             
                 save.push_back(separate);
               
             }
            
-           if ( argument == "date")
+           if ( separate == "date")
            {  
                 
                 time_t systemTime = time(0);
@@ -295,7 +295,7 @@ void aceptableCommands(string argument, bool exit)
                
            }
 
-            else if ( argument == "env")
+            else if ( separate == "env")
             {
                
                for (char **env = environ; *env; env++){
@@ -309,7 +309,7 @@ void aceptableCommands(string argument, bool exit)
         
             }
 
-           else if ( argument == "path")
+           else if ( separate == "path")
             {
                
                 const char* env_p = std::getenv("PATH");
@@ -319,7 +319,7 @@ void aceptableCommands(string argument, bool exit)
         
             }
 
-           else if ( argument == "cwd")
+           else if ( separate == "cwd")
             {
                
                	char buffer[MAX_LINE_LENGTH];
@@ -468,9 +468,17 @@ void aceptableCommands(string argument, bool exit)
 
 
             else
-            {
-                cout<< " Not accepted command -----> " << argument;
-                cout<<endl;
+            {   if ( argument != "")
+                {
+                    cout<< " Not accepted command -----> " << argument;
+                    cout<<endl;
+                }
+                else
+                {
+                    cout<<endl;
+                }
+                
+               
             }
             
     }
