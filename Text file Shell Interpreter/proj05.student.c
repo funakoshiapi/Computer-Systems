@@ -252,6 +252,16 @@ void indicator( )
  */
 void aceptableCommands(string argument, bool exit)
 {
+    
+    string tilda;
+    string userInput;
+    string dir;
+    string pathUser;
+    string pathDir;
+    int dirCheck;
+
+
+
     if ( argument == "exit")
     {
         cout<< " exit : " << " Interpreter terminated " << endl;
@@ -261,7 +271,8 @@ void aceptableCommands(string argument, bool exit)
 
 
     if (flag==false)  
-    {
+    {       
+            /// prepear argument to be handled by cd
             istringstream ss(argument); 
             vector<string> save;
             while (ss)
@@ -269,76 +280,10 @@ void aceptableCommands(string argument, bool exit)
                 string separate;
                 ss >> separate;
               
-                save.push_back(separate);
-                
              
+                save.push_back(separate);
+              
             }
-
-            
-            
-            if ( save[0] == "cd" )
-            {       
-
-                    int pathCheck ; /// to test if path exist
-  
-                    char s[100]; 
-
-                    if (save.size() == 2 || save[1]== "~") 
-                    {
-                        
-                        cout<< " " << argument <<" : ";
-                        /// cout<< " directory changed from "<< getcwd(s,100) ;
-                        chdir(getenv("HOME"));
-                        cout<< getcwd(s,100)<<endl;
-                        
-                    }
-
-                    /// starter path to be used
-                    string tilda = save[1].substr(0,1); ///> tilda character
-                    string userInput = save[1].substr(1);    ///> possible username
-                    string dir = save[1].substr(0);
-                    string pathUser = "/home/";
-                    string pathDir = "/home/" + dir;
-                    int dirCheck = chdir(pathDir.c_str());
-                    //cout << dir << endl;
-                    //  cout << tilda << endl;
-                    
-                    if (tilda == "~")   /// user name check
-                    {
-                        if (userName == userInput)
-                    
-                        {    
-                            pathUser += userInput;   
-                            chdir(pathUser.c_str());
-                            cout<< " " << argument << " : ";
-                            cout << getcwd(s,100) << endl;    
-                        }
-
-                        else 
-                        {
-                            cout<<" " << argument<<" : " << " Username is invalid. Failed to move to home directory" << endl;
-                        }
-                    }
-
-                    else if (  dirCheck == 0 ) /// directory name check
-                    {
-                         cout<< " " << argument << " : ";
-                         cout << getcwd(s,100) << endl;
-                    }
-
-                    else
-                    {
-                        cout<<" " << argument << " : " << " Directory does not exist" << endl;
-                    }
-
-                
-
-                    
-
-
-                
-            }
-         
            
            if ( argument == "date")
            {  
@@ -383,16 +328,151 @@ void aceptableCommands(string argument, bool exit)
                 cout<< endl;   
         
             }
+            /// allocate interpretation of  cd
+            else if ( save[0] == "cd" )
+            {       
+
+                    char s[100]; 
+
+                    if (save.size() == 2) 
+                    {
+                        
+                        cout<< " " << argument <<" : ";
+                        /// cout<< " directory changed from "<< getcwd(s,100) ;
+                        chdir(getenv("HOME"));
+                        string home = "/home/";
+                        home += userName;
+                        setenv("PWD", home.c_str(), 1);
+
+                        cout<< getcwd(s,100)<<endl;
+                        
+                    }
+                    // save contais cd and one more command
+                    if (save.size() > 2)
+                    {
+                        tilda = save[1].substr(0,1); ///> tilda character
+                        userInput = save[1].substr(1);    ///> possible username
+                        dir = save[1].substr(0);
+
+                        //cout<< "-->"<< userInput << endl;
+
+                        pathUser = "/home/";
+                        pathDir = "/home/" + dir;
+                        dirCheck = chdir(pathDir.c_str());
+                    }
+                    
+
+                  
+                    // save contains cd and one more command the third value on the vector correspond to white space
+                    if (save.size() == 3)
+                    {
+                        if (tilda == "~")   /// user name check
+                        {
+                            if (userName == userInput)
+                    
+                            {    
+                                pathUser += userInput;   
+                                chdir(pathUser.c_str());
+                                setenv("PWD", pathUser.c_str(), 1);
+                                cout<< " " << argument << " : ";
+                                cout << getcwd(s,100) << endl;    
+                            }
+                            else if (userInput == "")
+                            {
+                                cout<< " " << argument <<" : ";
+                                /// cout<< " directory changed from "<< getcwd(s,100) ;
+                                chdir(getenv("HOME"));
+                                string home = "/home/";
+                                home += userName;
+                                setenv("PWD", home.c_str(), 1);
+                                cout<< getcwd(s,100)<<endl;
+                            }
+
+                            else 
+                            {   
+                                cout<<" " << argument<<" : " << " Username is invalid. Failed to move to home directory" << endl;
+                            }
+                        }
+
+                        else if (  dirCheck == 0 ) /// directory name check
+                        {   
+                            setenv("PWD", pathDir.c_str(), 1);
+                            cout<< " " << argument << " : ";
+                            cout << getcwd(s,100) << endl;
+                        }
+
+                        
+                        else
+                        {
+                            cout<<" " << argument << " : " << " Directory does not exist" << endl;
+                        }
+                    }
+
+                    if (save.size() > 3)
+                    {
+
+                         cout<< " " << argument << " : Error! to many arguments after cd ";
+                         cout<<endl;
+
+                    }
+                
+                
+            }
+            /// allocate interpretation of set 
+            else if (save[0] == "set")
+            { 
+
+                 if (save.size() < 3)
+                 {
+                     cout<< " " << argument << " : Missing arguments. Try 'set Var Value' to set to a value or  'set var' to remove variable" << endl;
+                 }
+
+                 if (save.size() == 3) // theres a white space stored at the end of vector save therefore size is 3 and not 2
+                {
+                    string var = save[1];
+                    int check = unsetenv(var.c_str());  
+
+                    if (check == 0)
+                    {
+                         cout<< " " << argument << " : Success! Environment variable is now removed" << endl;
+                    }
+                    else
+                    {
+                        cout<< " " << argument << " : Error!  Failed to remove environment variable" << endl;
+                    }
+
+                }
+               
+                if (save.size() == 4)
+                {
+                    string var = save[1];
+                    string value = save[2]; 
+                    int check = setenv(var.c_str(), value.c_str(), 1);
+
+                    if (check == 0)
+                    {
+                        cout<< " " << argument << " : Environment variable is now set to its corresponding value " << endl;
+
+
+                    }
+                    else
+                    {
+                        cout<< " " << argument; 
+                        cout<< "Error! Failed to set environment variable to its value"<< endl;
+                    }
+                    
+                }
+               
+
+            }
 
 
             else
             {
+                cout<< " Not accepted command -----> " << argument;
                 cout<<endl;
             }
             
-
-            
-
     }
 
            
