@@ -2,7 +2,7 @@
 // Course: CSE 325
 
 
-
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <iterator>
@@ -19,20 +19,26 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+
 using namespace std;
 const char* userName = cuserid(NULL);
 const int MAX_LINE_LENGTH = 128;
  int count; // will represent the count of number of lines
  bool flag;
 
+
 // Function declaration
 vector<string> fileReader(string);
 void interpreter(vector<string>,bool, bool);
 void indicator();
 void aceptableCommands(string, bool);
+void externalCommands (string argument, char * value);
+void * systeam_interpreter(void * pointer);
 
 int main(int argc, char *argv[], char * envp[])
 {
+    
+   
     string readLine;
     vector<string> arguments;
     bool behaviour = true;
@@ -41,8 +47,7 @@ int main(int argc, char *argv[], char * envp[])
     vector<string> tokens;
     int countFiles=1;
     
-  
-
+    
 
     cout<< endl;
 
@@ -100,10 +105,12 @@ int main(int argc, char *argv[], char * envp[])
     }
 
 
-cout<< endl;
+    cout<< endl;
+
+    pthread_exit(NULL);
 
 
-return 0;
+    return 0;
 }
 
 
@@ -340,7 +347,7 @@ void aceptableCommands(string argument, bool exit)
                         cout<< " " << argument <<" : ";
                         /// cout<< " directory changed from "<< getcwd(s,100) ;
                         chdir(getenv("HOME"));
-                        string home = "/home/";
+                        string home = "/user/";
                         home += userName;
                         setenv("PWD", home.c_str(), 1);
 
@@ -356,8 +363,8 @@ void aceptableCommands(string argument, bool exit)
 
                         //cout<< "-->"<< userInput << endl;
 
-                        pathUser = "/home/";
-                        pathDir = "/home/" + dir;
+                        pathUser = "/user/";
+                        pathDir = "/user/" + dir;
                         dirCheck = chdir(pathDir.c_str());
                     }
                     
@@ -382,7 +389,7 @@ void aceptableCommands(string argument, bool exit)
                                 cout<< " " << argument <<" : ";
                                 /// cout<< " directory changed from "<< getcwd(s,100) ;
                                 chdir(getenv("HOME"));
-                                string home = "/home/";
+                                string home = "/user/";
                                 home += userName;
                                 setenv("PWD", home.c_str(), 1);
                                 cout<< getcwd(s,100)<<endl;
@@ -467,22 +474,73 @@ void aceptableCommands(string argument, bool exit)
             }
 
 
+        
+            else if ( argument != "")
+            {
+                    
+                 //externalCommands (argument, value);
+                    cout<< " " << argument  << " : check bellow" <<endl;
+
+                    pthread_t side_thread;
+                    char *value = new char[argument.length() + 1];
+                    strcpy(value, argument.c_str());
+
+                    int check = pthread_create(&side_thread, NULL, systeam_interpreter, (void*)value);
+
+                    if (check != 0)
+                    {
+                        cout<< "A problem happend while creating a thread" << endl;
+                    }
+                    
+
+            }
+
             else
-            {   if ( argument != "")
-                {
-                    cout<< " Not accepted command -----> " << argument;
-                    cout<<endl;
-                }
-                else
-                {
-                    cout<<endl;
-                }
+            {
+                    if (argument != "")
+                    {
+                            cout<< " Not accepted command -----> " << argument;
+                            cout<<endl;
+                    }
+
+                    if( argument == "")
+                    {
+                         cout<<endl;
+                    }
+                    
+                   
+            }
                 
                
-            }
+        
             
     }
 
            
        cout<< endl;      
+}
+
+// void externalCommands (string argument, char * value)
+// {
+//        pthread_t side_thread;
+//         strcpy(value,argument.c_str());
+//         pthread_create(&side_thread, NULL, systeam_interpreter, (void*) value);
+//         //pthread_join( side_thread, NULL);
+
+// }
+
+
+void * systeam_interpreter(void * pointer)
+{
+
+    
+    char *argument;
+
+    argument = (char *) pointer;
+
+   // cout << argument << endl;
+
+     system(argument);
+
+     pthread_exit(NULL);
 }
