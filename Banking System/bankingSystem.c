@@ -44,12 +44,23 @@ int main(int argc, char* argv[])
 int readArguments(const int& argc, char* argv[])
 {
 
-    if (argc ==1)
+     if (argc >= 6)  /// if more than 4 arguments. Since I check argc te computer understands the total arguments is  plus 1 the total ( 5+1  = 6)
+    {
+                    cout<< endl;
+                    cout << " Error: too many arguments "<< endl;
+                    cout<< endl;
+                    return 0;
+    }
+
+
+    if (argc ==1)  /// check if arguments are missing
 	{
 		cout << endl << "Missing argument" << endl << endl;
         return 0;
 		
 	}
+
+    int lock = 1;
 
     for (int i = 1; i < argc ; i++)
     {
@@ -60,35 +71,69 @@ int readArguments(const int& argc, char* argv[])
              cout<< endl;
              return 0;
          }
-        /// strings are characters so  argv[1][0] means the first character in the second string. ///
-        if (argv[i][0] == '-') 
-		
-		{
-            try
-            {
-                if (argv[i][1] != 'p')
+         if (lock == 1) /// allows to only visit each main if statment at a time, and react to each argument value one at a time
+         {
+                        /// strings are characters so  argv[1][0] means the first character in the second string. ///
+                if (argv[i][0] == '-') 
                 {
-                    /// later update to display the actual user input
-                    string message = " Error, unsupported flag. Use '-p' to set the number of producer threads ";
-                    throw message;
-                }
-               
-                if (strlen(argv[1]) > 2)
-                {   
-                    cout<< endl;
-                    cout<< "Invalid Flag: " << argv[1]<< " is not supported" << endl;
-                    cout << "Use '-p' to set the number of producer threads "<< endl;
-                    cout<< endl;
-                }
-            }
-            catch( string message) /// first flag was not -p
-            {   
-                cout<< endl;
-                cout<< message << endl;
-                cout<< endl;
-            }
+                    try
+                    {
+                        if (argv[i][1] != 'p')
+                        {
+                            /// later update to display the actual user input
+                            string message = " Error, unsupported flag. Use '-p' to set the number of producer threads ";
+                            throw message;
+                        }
+                    
+                        if (strlen(argv[1]) > 2)
+                        {   
+                            cout<< endl;
+                            cout<< "Invalid Flag: " << argv[1]<< " is not supported" << endl;
+                            cout << "Use '-p' to set the number of producer threads "<< endl;
+                            cout<< endl;
+                        }
             
-        }
+                    }
+                    catch( string message) /// first flag was not -p
+                    {   
+                        cout<< endl;
+                        cout<< message << endl;
+                        cout<< endl;
+                    }
+                
+                }
+         }
+
+         if (lock == 2) /// Process second argument. The integer amout for the number of producer threads
+         {
+
+                          
+                    if (argc >= 3) // argv[2] -> interger number of producer threads
+                    {
+                    
+                        if ( integerCheck(argv[2]) ) /// check if string 2 is a interger number
+                        {
+                            int userInput = stoi(argv[2]);
+                            if(userInput > 10 || userInput < 1 )
+                            {
+                                cout << endl;
+                                cout<<" Error: Producer thread cannot be greater then 10 nor less then 1. (1-10)" << endl;
+                                
+                            } 
+                        }
+                        else
+                        {   cout << endl;
+                            cout << "Error: -p flag needs to be followed by interger number between 1 and 10"<< endl;
+                            cout << endl;
+                        }
+                        
+                        
+                    }
+
+
+         }
+
+        lock += 1;
     }
 
 
@@ -117,29 +162,8 @@ bool integerCheck (string value)
                 //  /// continue with code check of size of producer thread
 
 
-                // if (argc >= 6)  /// if more than 4 arguments. Since I check argc te computer understands the total arguments is  plus 1 the total ( 5+1  = 6)
-                // {
-                //     cout<< endl;
-                //     cout << " Error: too many arguments "<< endl;
-                //     cout<< endl;
-                //     return 0;
-                // }
+               
 
-                // if (argc >= 3) // argv[2] -> interger number of producer threads
-                // {
-                
-                //     if ( integerCheck(argv[2]) )
-                //     {
-                //          int userInput = stoi(argv[2]);
-                //          if(userInput > 10 || userInput < 1 )
-                //          {
-                //              cout<<" Error: Producer thread cannot be greater then 10 nor less then 1. (1-10)" << endl;
-                //          } 
-                //     }
-
-                
-                    
-                // }
 
 
                 // if (argc >= 4) // argv[3] -> buffer for the flag
