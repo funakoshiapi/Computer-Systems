@@ -14,29 +14,28 @@
 #include <exception>
 #include <cstring>
 
-//     2. When the program begins execution, it will read zero or more lines from the input file named "accounts.old" to
-// initialize the set of customer accounts. Each line of that file will contain an account number (integer number) and
-// account balance (real number). When the program halts execution, it will write the updated set of accounts to the
-// output file named "accounts.new". 
-
+// deal with accout files
 
 using namespace std;
 
-int readArguments(const int& argc, char* argv[]);
+bool readArguments(const int& argc, char* argv[]);
 bool integerCheck (string value);
-void pFlagCheck(int i , char * argv[]);
-void bFlagCheck(int i , char * argv[]);
+bool pFlagCheck(int i , char * argv[]);
+bool bFlagCheck(int i , char * argv[]);
 
 
 int BUFFER = 5 ;  ///> can't exceed 20
 int PRODUCER_THREAD_COUNT = 1; ///> can't exceed 10
+const string INPUT_F = "accounts.old";
+const string OUTPUT_F = "accounts.new";
+const string LOG_F = "accounts.log";
+const string FILE_HEAD = "trans";
 
 
 int main(int argc, char* argv[])
 {
+    
     readArguments(argc, argv);
-
-    //cout << " number of threads "<< PRODUCER_THREAD_COUNT << endl;
 
 
 
@@ -45,7 +44,7 @@ int main(int argc, char* argv[])
 }
 
 
-int readArguments(const int& argc, char* argv[])
+bool readArguments(const int& argc, char* argv[])
 {
 
      if (argc >= 6)  /// if more than 4 arguments. Since I check argc te computer understands the total arguments is  plus 1 the total ( 5+1  = 6)
@@ -53,14 +52,16 @@ int readArguments(const int& argc, char* argv[])
                     cout<< endl;
                     cout << " Error: too many arguments "<< endl;
                     cout<< endl;
-                    return 0;
+                    return false;
     }
 
-
-    if (argc ==1)  /// check if arguments are missing
+    else if (argc == 1 || argc < 5)  /// check if arguments are missing
 	{
-		cout << endl << "Missing argument" << endl << endl;
-        return 0;
+		
+                    cout<< endl;
+                    cout << " Error: Missing arguments. Arguments should have a flag and a corresponding value. Example: '-p 3 -b 6' "<< endl;
+                    cout<< endl;
+                    return false;
 		
 	}
 
@@ -72,7 +73,7 @@ int readArguments(const int& argc, char* argv[])
              cout<< endl;
              cout << "Missing Flag indicator: Flag one is missing '-' symbol " << endl;
              cout<< endl;
-             return 0;
+             return false;
          }
          if (i == 1) /// allows to only visit each main if statment at a time, and react to each argument value one at a time
          {
@@ -93,6 +94,7 @@ int readArguments(const int& argc, char* argv[])
                             {
                                 cout << endl;
                                 cout<<" Error: Producer thread cannot be greater then 10 nor less then 1. (1-10)" << endl;
+                                return false;
                                 
                             }
                             else
@@ -105,6 +107,7 @@ int readArguments(const int& argc, char* argv[])
                         {   cout << endl;
                             cout << "Error: -p flag needs to be followed by interger number between 1 and 10"<< endl;
                             cout << endl;
+                            return false;
                         }
                         
                         
@@ -126,6 +129,7 @@ int readArguments(const int& argc, char* argv[])
                     {
                         cout << endl;
                         cout<<" Error: Buffer cannot be greater then 20 nor less then 5. (5-20)" << endl;
+                        return false;
                         
                     }
                     else
@@ -138,13 +142,14 @@ int readArguments(const int& argc, char* argv[])
                 {   cout << endl;
                     cout << "Error: -b flag needs to be followed by interger number between 5 and 20"<< endl;
                     cout << endl;
+                    return false;
                 }
 
         }
 
 
     }
-
+    return true;
 }
 
 bool integerCheck (string value)
@@ -161,7 +166,7 @@ bool integerCheck (string value)
 }
 
 
-void pFlagCheck(int i , char * argv[])
+bool pFlagCheck(int i , char * argv[])
 {
 
                          /// strings are characters so  argv[1][0] means the first character in the second string. ///
@@ -182,6 +187,7 @@ void pFlagCheck(int i , char * argv[])
                             cout<< "Invalid Flag: " << argv[1]<< " is not supported" << endl;
                             cout << "Use '-p' to set the number of producer threads "<< endl;
                             cout<< endl;
+                            return false;
                         }
             
                     }
@@ -190,6 +196,7 @@ void pFlagCheck(int i , char * argv[])
                         cout<< endl;
                         cout<< message << endl;
                         cout<< endl;
+                        return false;
                     }
                 
                 }
@@ -199,7 +206,7 @@ void pFlagCheck(int i , char * argv[])
 }
 
 
-void bFlagCheck(int i , char * argv[])
+bool bFlagCheck(int i , char * argv[])
 {
 
                 /// strings are characters so  argv[1][0] means the first character in the second string. ///
@@ -220,6 +227,7 @@ void bFlagCheck(int i , char * argv[])
                             cout<< "Invalid Flag: " << argv[i]<< " is not supported" << endl;
                             cout << "Use '-b' to set the buffer size "<< endl;
                             cout<< endl;
+                            return false;
                         }
             
                     }
@@ -228,6 +236,7 @@ void bFlagCheck(int i , char * argv[])
                         cout<< endl;
                         cout<< message << endl;
                         cout<< endl;
+                        return false;
                     }
                 
                 }
